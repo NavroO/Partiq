@@ -7,6 +7,7 @@ import (
 	"partiq/internal/shared"
 
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/cors"
 	_ "github.com/lib/pq"
 
 	"partiq/internal/processes"
@@ -30,11 +31,16 @@ func main() {
 	processHandler := processes.NewHandler(processSvc)
 
 	r := chi.NewRouter()
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:*"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		AllowCredentials: true,
+	}))
 	r.Get("/processes", processHandler.GetAll)
 
 	log.Println("Server running on :8080")
-	err = http.ListenAndServe(":8080", r)
-	if err != nil {
-		return
+	if err := http.ListenAndServe(":8080", r); err != nil {
+		log.Fatalf("❌ server failed: %v", err)
 	}
 }

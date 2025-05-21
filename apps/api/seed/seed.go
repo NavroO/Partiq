@@ -1,10 +1,11 @@
-package seed
+package main
 
 import (
-	"github.com/joho/godotenv"
 	"log"
 	"partiq/internal/shared"
 	"time"
+
+	"github.com/joho/godotenv"
 )
 
 func main() {
