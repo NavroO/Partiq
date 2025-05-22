@@ -2,7 +2,6 @@ package main
 
 import (
 	"database/sql"
-	"log"
 	"net/http"
 	"os"
 	"partiq/internal/proposals"
@@ -14,18 +13,22 @@ import (
 	_ "github.com/lib/pq"
 
 	"partiq/internal/processes"
+
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
 	db, err := shared.ConnectDB()
+	shared.SetupLogger()
+	log.Info().Msg("📦 Logger initialized")
 
 	if err != nil {
-		log.Fatal("cannot connect to db:", err)
+		log.Fatal().Msgf("cannot connect to db: %v", err)
 	}
 
 	port := os.Getenv("PORT")
 	if port == "" {
-		log.Fatal("❌ PORT is not set in .env")
+		log.Fatal().Msg("❌ PORT is not set in .env")
 	}
 
 	defer func(db *sql.DB) {
@@ -43,6 +46,7 @@ func main() {
 	proposalHandler := proposals.NewHandler(proposalSvc)
 
 	r := chi.NewRouter()
+	r.Use(shared.RequestLogger)
 	origins := strings.Split(os.Getenv("CORS_ORIGINS"), ",")
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   origins,
@@ -60,6 +64,6 @@ func main() {
 
 	log.Printf("🚀 starting server on :%s\n", port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
-		log.Fatalf("❌ server failed: %v", err)
+		log.Fatal().Msgf("❌ server failed: %v", err)
 	}
 }

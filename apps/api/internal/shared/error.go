@@ -2,8 +2,9 @@ package shared
 
 import (
 	"encoding/json"
-	"log"
 	"net/http"
+
+	"github.com/rs/zerolog/log"
 )
 
 type ErrorResponse struct {
@@ -11,10 +12,11 @@ type ErrorResponse struct {
 }
 
 func RespondError(w http.ResponseWriter, code int, message string) {
-	log.Println("Error:", message)
+	log.Error().Int("status", code).Msg("❌ " + message)
+
 	w.WriteHeader(code)
 	err := json.NewEncoder(w).Encode(ErrorResponse{Error: message})
 	if err != nil {
-		return
+		log.Error().Err(err).Msg("❌ failed to encode error response")
 	}
 }
