@@ -12,10 +12,12 @@ ALTER TABLE proposals
 ADD CONSTRAINT fk_process
 FOREIGN KEY (process_id) REFERENCES processes(id) ON DELETE CASCADE;
 
-
 ALTER TABLE proposals
 ADD CONSTRAINT fk_user
 FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE;
 
 CREATE INDEX idx_proposals_process_id ON proposals(process_id);
 CREATE INDEX idx_proposals_user_id ON proposals(user_id);
+
+CREATE UNIQUE INDEX idx_proposals_process_id_title
+  ON proposals(process_id, title);

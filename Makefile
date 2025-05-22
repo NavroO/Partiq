@@ -6,6 +6,7 @@ export
 MIGRATIONS_DIR=apps/api/migrations
 SEED=apps/api/seed/seed.go
 API=apps/api
+SEED=seed/seed.go
 CLIENT=apps/client
 
 # -------------------
