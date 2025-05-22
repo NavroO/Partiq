@@ -46,6 +46,7 @@ func main() {
 	proposalHandler := proposals.NewHandler(proposalSvc)
 
 	r := chi.NewRouter()
+	r.Use(shared.LoggingMiddleware)
 	r.Use(shared.RequestLogger)
 	origins := strings.Split(os.Getenv("CORS_ORIGINS"), ",")
 	r.Use(cors.Handler(cors.Options{

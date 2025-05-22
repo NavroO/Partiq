@@ -8,6 +8,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+var LogPayloads bool
+
 func SetupLogger() {
 	zerolog.TimeFieldFormat = time.RFC3339
 
@@ -15,4 +17,6 @@ func SetupLogger() {
 		Out:        os.Stdout,
 		TimeFormat: "15:04:05",
 	}).With().Timestamp().Logger()
+
+	LogPayloads = os.Getenv("LOG_PAYLOADS") == "true"
 }
