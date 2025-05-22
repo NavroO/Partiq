@@ -4,7 +4,10 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
+	"os"
+	"partiq/internal/proposals"
 	"partiq/internal/shared"
+	"strings"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -19,6 +22,12 @@ func main() {
 	if err != nil {
 		log.Fatal("cannot connect to db:", err)
 	}
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		log.Fatal("❌ PORT is not set in .env")
+	}
+
 	defer func(db *sql.DB) {
 		err := db.Close()
 		if err != nil {
@@ -29,18 +38,28 @@ func main() {
 	processRepo := processes.NewRepository(db)
 	processSvc := processes.NewService(processRepo)
 	processHandler := processes.NewHandler(processSvc)
+	proposalRepo := proposals.NewRepository(db)
+	proposalSvc := proposals.NewService(proposalRepo)
+	proposalHandler := proposals.NewHandler(proposalSvc)
 
 	r := chi.NewRouter()
+	origins := strings.Split(os.Getenv("CORS_ORIGINS"), ",")
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:*"},
+		AllowedOrigins:   origins,
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		AllowCredentials: true,
 	}))
-	r.Get("/processes", processHandler.GetAll)
 
-	log.Println("Server running on :8080")
-	if err := http.ListenAndServe(":8080", r); err != nil {
+	r.Route("/processes", func(r chi.Router) {
+		r.Get("/", processHandler.GetAll)
+		r.Route("/{processID}", func(r chi.Router) {
+			r.Get("/proposals", proposalHandler.GetByProcessID)
+		})
+	})
+
+	log.Printf("🚀 starting server on :%s\n", port)
+	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatalf("❌ server failed: %v", err)
 	}
 }
