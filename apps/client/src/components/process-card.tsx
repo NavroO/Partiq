@@ -6,7 +6,7 @@ interface ProcessCardProps {
 
 export const ProcessCard = ({ process }: ProcessCardProps) => {
   return (
-    <div className="transition-all duration-300 hover:shadow-md">
+    <div className="transition-all duration-300 hover:shadow-md" onClick={() => window.location.href = `/process/${process.id}`}>
       <div className="pb-2">
         <div className="flex justify-between items-start">
 

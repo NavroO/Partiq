@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"net/http"
 	"os"
-	"partiq/internal/proposals"
 	"partiq/internal/shared"
 	"strings"
 
@@ -41,9 +40,9 @@ func main() {
 	processRepo := processes.NewRepository(db)
 	processSvc := processes.NewService(processRepo)
 	processHandler := processes.NewHandler(processSvc)
-	proposalRepo := proposals.NewRepository(db)
-	proposalSvc := proposals.NewService(proposalRepo)
-	proposalHandler := proposals.NewHandler(proposalSvc)
+	// proposalRepo := proposals.NewRepository(db)
+	// proposalSvc := proposals.NewService(proposalRepo)
+	// proposalHandler := proposals.NewHandler(proposalSvc)
 
 	r := chi.NewRouter()
 	r.Use(shared.RequestLogger)
@@ -56,11 +55,19 @@ func main() {
 	}))
 
 	r.Route("/processes", func(r chi.Router) {
-		r.Get("/", processHandler.GetAll)
-		r.Route("/{processID}", func(r chi.Router) {
-			r.Get("/proposals", proposalHandler.GetByProcessID)
-		})
+		r.Get("/", processHandler.GetAll)                    // GET /processes
+		r.Get("/{processID}", processHandler.GetProcessByID) // GET /processes/{processID}
 	})
+
+	// r.Route("/processes", func(r chi.Router) {
+	// 	r.Get("/", processHandler.GetAll) // GET /processes
+
+	// 	// zamiast "processes/{processID}" użyj "/{processID}"
+	// 	r.Route("/{processID}", func(r chi.Router) {
+	// 		r.Get("/", processHandler.GetProcessByID)           // GET /processes/{processID}
+	// 		r.Get("/proposals", proposalHandler.GetByProcessID) // GET /processes/{processID}/proposals
+	// 	})
+	// })
 
 	log.Printf("🚀 starting server on :%s\n", port)
 	if err := http.ListenAndServe(":"+port, r); err != nil {
