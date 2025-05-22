@@ -4,6 +4,7 @@ import (
 	"context"
 	"partiq/internal/shared"
 	"strconv"
+	"time"
 
 	"github.com/rs/zerolog/log"
 )
@@ -17,7 +18,7 @@ type service struct {
 	repo Repository
 }
 
-var processCache = shared.NewCache()
+var processCache = shared.NewCache(5 * time.Minute)
 
 func NewService(repo Repository) Service {
 	return &service{repo: repo}
